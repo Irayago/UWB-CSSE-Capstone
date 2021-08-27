@@ -1,7 +1,7 @@
 classdef CNNnetwork < handle
     properties (SetAccess = private)
         %initialize googlenet
-        net = googlenet
+        net = googlenet;
         trainedNet
         trainingDset
         validationDset
@@ -9,6 +9,7 @@ classdef CNNnetwork < handle
         layerGraph
         numOfClasses
     end
+        
     methods
         function obj = CNNnetwork(dName)
             
@@ -52,8 +53,7 @@ classdef CNNnetwork < handle
            
         % not used at the moment but could be used for further
         % customization with user input as a feature
-        function obj = augmentImages(obj)
-            
+        function obj = augmentImages(obj)           
             pixel_range = [-30 30];
             scale_range = [0.9 1.1];
             
@@ -72,9 +72,7 @@ classdef CNNnetwork < handle
             %obj.augmentedValSet = augmentedImageDatastore(obj.inputLayerSize(1:2),obj.validationDset);          
         end
         
-        function obj = trainCNN(obj)
-            
-                        
+        function obj = trainCNN(obj)                                
             pixel_range = [-30 30];
             scale_range = [0.9 1.1];
             
@@ -107,7 +105,20 @@ classdef CNNnetwork < handle
                 'Verbose',false,...
                 'Plots','training-progress');
             
-            obj.trainedNet = trainNetwork(augmentedTrainSet,obj.layerGraph,trainOptions);            
+            obj.trainedNet = trainNetwork(augmentedTrainSet,obj.layerGraph,trainOptions);         
+        end
+                
+        %function to save current trained CNN
+        function saveNetwork(obj,fileName)  
+            %netName = getname(obj.trainedNet);
+            save(fileName);
+        end
+        
+        %function to load a trained CNN
+        %assumes there is a CNN in the .mat file
+        function net = loadNetwork(obj,fileName)
+            tempNet = load(fileName);
+            net = tempNet.obj;
         end
         
         function obj = testImage(obj, image)         
@@ -120,17 +131,47 @@ classdef CNNnetwork < handle
         end
         
         function obj = testVideo(obj, video)
+            %import ARclasses.figCloseReq
             vidReader = getVidReader(video);
             vidReader.CurrentTime = 0;
+            fRate = getFrameRate(video);
+            
+            c = uicontrol(gcf,'Style','togglebutton','String','Pause/Play');
+            
             while hasFrame(vidReader)
                 frame = readFrame(vidReader);
                 image(frame);
                 testFrame = imresize(frame,[224 224]);
                 
                 [label,prob] = classify(obj.trainedNet,testFrame);
-                title(char(label), num2str(max(prob),2));
+                
+                title(gca, char(label), num2str(max(prob),2));
+                butVal = c.Value;
+                set(gca,'xtick',[]);
+                set(gca,'ytick',[]);
                 drawnow;
+                pause(1/fRate);
+                
+                %check button input for pause and play; 
+                while (butVal == 1)
+                    pause(0.5);                    
+                    if (exist('c.Value','var') == 1)                      
+                    butVal = c.Value;                   
+                        if (butVal == 0)
+                            break;
+                        end
+                    end
+               end
+                
+                %break out of loop once figure window closes
+                global closeWindowCheck;
+                closeWindowCheck = false;
+                set(gcf,'CloseRequestFcn',@figCloseReq);
+                if(closeWindowCheck == true)
+                    break;
+                end
             end
+            %clear global;
         end
         
         function showArchitecture(obj)
@@ -138,4 +179,7 @@ classdef CNNnetwork < handle
         end
         
     end
+    
+    methods(Static, Access = private)
+    end    
 end

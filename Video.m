@@ -5,6 +5,7 @@ classdef Video
         name
         path
         numOfFrames
+        frameRate
     end
     methods
         function obj = Video(vName)
@@ -12,6 +13,7 @@ classdef Video
             obj.duration = obj.vid.Duration;
             obj.path = obj.vid.Path;
             obj.name = obj.vid.Name;
+            obj.frameRate = obj.vid.FrameRate;
             
             count = 0;
             while hasFrame(obj.vid)
@@ -39,6 +41,10 @@ classdef Video
         
         function frameNum = getFrames(obj)
            frameNum = obj.numOfFrames; 
+        end
+        
+        function fRate = getFrameRate(obj)
+            fRate = obj.frameRate;
         end
         
         function frames = readVideo(obj, index)

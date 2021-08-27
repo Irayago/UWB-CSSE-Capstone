@@ -11,8 +11,5 @@ classdef Actor
             aName = obj.name;
         end
         
-        function obj = setName(obj, actName)
-           obj.name = actName; 
-        end
     end
 end
