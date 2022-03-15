@@ -1,2 +1,4 @@
 # UWB-CSSE-Capstone
-Facial recognition prototype that can recognize certain actors in images and videos
+- An application that utilizes convolutional neural networks recognize actors in videos and images
+- Implemented video playback, training and prediction visualization, architecture visualization, data augmentation, importing and exporting data
+- Built with MATLAB, Deep learning Toolbox, Trello, Draw.io
